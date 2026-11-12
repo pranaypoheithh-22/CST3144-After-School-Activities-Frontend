@@ -76,7 +76,25 @@
             font-weight: bold;
             color: #126746;
         }
+        .sorting-controls {
+          background: white;
+          padding: 15px;
+          margin-bottom: 20px;
+          border: 1px solid #dfe5ee;
+          border-radius: 12px;
+        }
 
+        .sorting-controls label {
+         margin-right: 10px;
+         font-weight: bold;
+        }
+
+        .sorting-controls select {
+          padding: 8px;
+          margin-right: 15px;
+          border: 1px solid #dfe5ee;
+          border-radius: 6px;
+        }
     </style>
 
 </head>
@@ -93,13 +111,32 @@
                 Explore our classes and activities.
             </p>
         </header>
+        <!-- Sorting controls -->
+        <div class="sorting-controls">
+          <label for="sortBy">Sort lessons by:</label>
+
+          <select id="sortBy" v-model="sortBy">
+           <option value="subject">Subject</option>
+           <option value="location">Location</option>
+           <option value="price">Price</option>
+           <option value="spaces">Available Spaces</option>
+          </select>
+
+          <label for="sortOrder">Order:</label>
+
+          <select id="sortOrder" v-model="sortOrder">
+           <option value="asc">Ascending</option>
+           <option value="desc">Descending</option>
+         </select>
+</div>
+
 
         <!-- Display all lessons using v-for -->
         <main class="lesson-grid">
 
             <article
                 class="lesson-card"
-                v-for="lesson in lessons"
+                v-for="lesson in sortedLessons"
                 v-bind:key="lesson.id">
 
                 <!-- Lesson icon -->
@@ -144,6 +181,8 @@
             data() {
 
                 return {
+                  sortBy: "subject",
+                  sortOrder: "asc",
 
                     // Array containing all lessons
                     lessons: [
@@ -239,13 +278,43 @@
                         }
 
                     ]
-
                 };
+            },
+             
+         // Automatically sort lessons when a dropdown changes
+            computed: {
+                sortedLessons() {
 
+                    return [...this.lessons].sort((a, b) => {
+
+                        let result;
+
+                        // Sort text alphabetically
+                        if (this.sortBy === "subject" ||
+                            this.sortBy === "location") {
+
+                            result = a[this.sortBy].localeCompare(
+                                b[this.sortBy]
+                            );
+
+                        } else {
+
+                            // Sort price and spaces numerically
+                            result = a[this.sortBy] - b[this.sortBy];
+
+                        }
+
+                        // Apply ascending or descending order
+                        return this.sortOrder === "asc"
+                            ? result
+                            : -result;
+
+                    });
+
+                }
             }
 
         });
-
         // Connect Vue to the HTML element
         app.mount("#app");
 
