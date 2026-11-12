@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>After School Activities</title>
+
+    <!-- Load Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Load Font Awesome icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- CSS: Website appearance -->
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6fa;
+            color: #17243a;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 28px 18px;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            margin-top: 0;
+            color: #53657d;
+        }
+
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .lesson-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #dfe5ee;
+            border-radius: 12px;
+        }
+
+        .lesson-icon {
+            font-size: 32px;
+            color: #2356a8;
+        }
+
+        .lesson-card h2 {
+            margin: 14px 0 10px;
+        }
+
+        .lesson-card p {
+            margin: 7px 0;
+        }
+
+        .spaces {
+            font-weight: bold;
+            color: #126746;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Main Vue application -->
+    <div id="app" class="container">
+
+        <header>
+            <h1>After School Activities</h1>
+
+            <p class="subtitle">
+                Explore our classes and activities.
+            </p>
+        </header>
+
+        <!-- Display all lessons using v-for -->
+        <main class="lesson-grid">
+
+            <article
+                class="lesson-card"
+                v-for="lesson in lessons"
+                v-bind:key="lesson.id">
+
+                <!-- Lesson icon -->
+                <i v-bind:class="lesson.icon"
+                   class="lesson-icon"
+                   aria-hidden="true"></i>
+
+                <!-- Lesson subject -->
+                <h2>{{ lesson.subject }}</h2>
+
+                <!-- Lesson location -->
+                <p>
+                    Location: {{ lesson.location }}
+                </p>
+
+                <!-- Lesson price -->
+                <p>
+                    Price: Rs {{ lesson.price }}
+                </p>
+
+                <!-- Available spaces -->
+                <p class="spaces">
+                    Available spaces: {{ lesson.spaces }}
+                </p>
+
+            </article>
+
+        </main>
+
+    </div>
+
+    <!-- JavaScript and Vue.js -->
+    <script>
+
+        // Access the createApp function from Vue
+        const { createApp } = Vue;
+
+        // Create the Vue application
+        const app = createApp({
+
+            // Application data
+            data() {
+
+                return {
+
+                    // Array containing all lessons
+                    lessons: [
+
+                        {
+                            id: 1001,
+                            subject: "Art",
+                            location: "Curepipe",
+                            price: 400,
+                            spaces: 5,
+                            icon: "fa fa-paint-brush"
+                        },
+
+                        {
+                            id: 1002,
+                            subject: "Mathematics",
+                            location: "Quatre Bornes",
+                            price: 350,
+                            spaces: 5,
+                            icon: "fa fa-calculator"
+                        },
+
+                        {
+                            id: 1003,
+                            subject: "Science",
+                            location: "Rose Hill",
+                            price: 450,
+                            spaces: 5,
+                            icon: "fa fa-flask"
+                        },
+
+                        {
+                            id: 1004,
+                            subject: "Music",
+                            location: "Vacoas",
+                            price: 500,
+                            spaces: 5,
+                            icon: "fa fa-music"
+                        },
+
+                        {
+                            id: 1005,
+                            subject: "Football",
+                            location: "Moka",
+                            price: 300,
+                            spaces: 5,
+                            icon: "fa fa-futbol-o"
+                        },
+
+                        {
+                            id: 1006,
+                            subject: "Computer Science",
+                            location: "Port Louis",
+                            price: 550,
+                            spaces: 5,
+                            icon: "fa fa-laptop"
+                        },
+
+                        {
+                            id: 1007,
+                            subject: "English",
+                            location: "Phoenix",
+                            price: 350,
+                            spaces: 5,
+                            icon: "fa fa-book"
+                        },
+
+                        {
+                            id: 1008,
+                            subject: "Photography",
+                            location: "Beau Bassin",
+                            price: 500,
+                            spaces: 5,
+                            icon: "fa fa-camera"
+                        },
+
+                        {
+                            id: 1009,
+                            subject: "Geography",
+                            location: "Curepipe",
+                            price: 350,
+                            spaces: 5,
+                            icon: "fa fa-globe"
+                        },
+
+                        {
+                            id: 1010,
+                            subject: "Dance",
+                            location: "Quatre Bornes",
+                            price: 400,
+                            spaces: 5,
+                            icon: "fa fa-child"
+                        }
+
+                    ]
+
+                };
+
+            }
+
+        });
+
+        // Connect Vue to the HTML element
+        app.mount("#app");
+
+    </script>
+
+</body>
+
+</html>
