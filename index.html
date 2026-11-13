@@ -17,127 +17,14 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6fa;
-            color: #17243a;
-        }
+    <!-- Load external CSS file -->
+    <link rel="stylesheet" href="style.css">
 
-        .container {
-            max-width: 1050px;
-            margin: 0 auto;
-            padding: 28px 18px;
-        }
-
-        header {
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            margin-top: 0;
-            color: #53657d;
-        }
-
-        .lesson-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-        }
-
-        .lesson-card {
-            background: white;
-            padding: 20px;
-            border: 1px solid #dfe5ee;
-            border-radius: 12px;
-        }
-
-        .lesson-icon {
-            font-size: 32px;
-            color: #2356a8;
-        }
-
-        .lesson-card h2 {
-            margin: 14px 0 10px;
-        }
-
-        .lesson-card p {
-            margin: 7px 0;
-        }
-
-        .spaces {
-            font-weight: bold;
-            color: #126746;
-        }
-
-        .sorting-controls {
-            background: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #dfe5ee;
-            border-radius: 12px;
-        }
-
-        .sorting-controls label {
-            margin-right: 10px;
-            font-weight: bold;
-        }
-
-        .sorting-controls select {
-            padding: 8px;
-            margin-right: 15px;
-            border: 1px solid #dfe5ee;
-            border-radius: 6px;
-        }
-
-        .cart-item,
-        .checkout-box,
-        .confirmation {
-            background: white;
-            border: 1px solid #dfe5ee;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 16px 0;
-        }
-
-        .checkout-box label {
-            display: block;
-            font-weight: bold;
-            margin-top: 12px;
-        }
-
-        .checkout-box input {
-            display: block;
-            box-sizing: border-box;
-            width: 100%;
-            max-width: 360px;
-            padding: 9px;
-            margin-top: 5px;
-        }
-
-        .error {
-            color: #b42318;
-        }
-
-        button {
-            padding: 9px 14px;
-            cursor: pointer;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    </style>
 </head>
 
 <body>
 
+    <!-- Main Vue application -->
     <div id="app" class="container">
 
         <header>
@@ -149,8 +36,9 @@
         </header>
 
         <!-- Shopping Cart navigation -->
-        <button type="button"
-                v-on:click="displayCart = !displayCart">
+        <button
+            type="button"
+            v-on:click="displayCart = !displayCart">
 
             <i class="fa fa-shopping-cart"></i>
 
@@ -163,25 +51,33 @@
         <!-- Sorting controls -->
         <div class="sorting-controls" v-if="!displayCart">
 
-            <label for="sortBy">Sort lessons by:</label>
+            <label for="sortBy">
+                Sort lessons by:
+            </label>
 
             <select id="sortBy" v-model="sortBy">
+
                 <option value="subject">Subject</option>
                 <option value="location">Location</option>
                 <option value="price">Price</option>
                 <option value="spaces">Available Spaces</option>
+
             </select>
 
-            <label for="sortOrder">Order:</label>
+            <label for="sortOrder">
+                Order:
+            </label>
 
             <select id="sortOrder" v-model="sortOrder">
+
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
+
             </select>
 
         </div>
 
-        <!-- Display lessons -->
+        <!-- Display all lessons -->
         <main class="lesson-grid" v-if="!displayCart">
 
             <article
@@ -189,25 +85,34 @@
                 v-for="lesson in sortedLessons"
                 v-bind:key="lesson.id">
 
-                <i v-bind:class="lesson.icon"
-                   class="lesson-icon"
-                   aria-hidden="true"></i>
+                <!-- Lesson icon -->
+                <i
+                    v-bind:class="lesson.icon"
+                    class="lesson-icon"
+                    aria-hidden="true">
+                </i>
 
+                <!-- Lesson subject -->
                 <h2>{{ lesson.subject }}</h2>
 
+                <!-- Lesson location -->
                 <p>
                     Location: {{ lesson.location }}
                 </p>
 
+                <!-- Lesson price -->
                 <p>
                     Price: Rs {{ lesson.price }}
                 </p>
 
+                <!-- Available spaces -->
                 <p class="spaces">
                     Available spaces: {{ lesson.spaces }}
                 </p>
 
+                <!-- Add to Cart button -->
                 <button
+                    type="button"
                     v-on:click="addToCart(lesson)"
                     v-bind:disabled="lesson.spaces === 0">
 
@@ -225,9 +130,10 @@
             <h2>Your Shopping Cart</h2>
 
             <!-- Booking confirmation -->
-            <div v-if="confirmation"
-                 class="confirmation"
-                 role="status">
+            <div
+                v-if="confirmation"
+                class="confirmation"
+                role="status">
 
                 <h3>Booking Confirmation (Demo)</h3>
 
@@ -255,10 +161,14 @@
 
             </div>
 
+            <!-- Cart contents and checkout -->
             <template v-else>
 
+                <!-- Empty cart message -->
                 <p v-if="cart.length === 0">
+
                     Your shopping cart is empty.
+
                 </p>
 
                 <div v-else>
@@ -279,6 +189,7 @@
                             Price: Rs {{ lesson.price }}
                         </p>
 
+                        <!-- Remove button -->
                         <button
                             type="button"
                             v-on:click="removeFromCart(index)">
@@ -289,18 +200,19 @@
 
                     </div>
 
-                    <!-- Cart total -->
+                    <!-- Shopping Cart Total -->
                     <h3>
                         Cart Total: Rs {{ cartTotal }}
                     </h3>
 
                     <!-- Checkout form -->
-                    <form class="checkout-box"
-                          v-on:submit.prevent="checkout">
+                    <form
+                        class="checkout-box"
+                        v-on:submit.prevent="checkout">
 
                         <h3>Checkout</h3>
 
-                        <!-- Customer name -->
+                        <!-- Customer Name -->
                         <label for="customerName">
                             Full name:
                         </label>
@@ -311,14 +223,16 @@
                             v-model="customerName"
                             placeholder="Enter your full name">
 
-                        <p class="error"
-                           v-if="customerName !== '' && !isNameValid">
+                        <!-- Name validation -->
+                        <p
+                            class="error"
+                            v-if="customerName !== '' && !isNameValid">
 
                             Use letters and spaces only.
 
                         </p>
 
-                        <!-- Customer phone -->
+                        <!-- Customer Phone -->
                         <label for="customerPhone">
                             Phone number:
                         </label>
@@ -330,15 +244,17 @@
                             v-model="customerPhone"
                             placeholder="Enter your phone number">
 
-                        <p class="error"
-                           v-if="customerPhone !== '' && !isPhoneValid">
+                        <!-- Phone validation -->
+                        <p
+                            class="error"
+                            v-if="customerPhone !== '' && !isPhoneValid">
 
                             Use digits only
                             (no spaces or symbols).
 
                         </p>
 
-                        <!-- Confirm Booking -->
+                        <!-- Confirm Booking button -->
                         <button
                             type="submit"
                             v-bind:disabled="!isCheckoutValid">
@@ -360,31 +276,35 @@
     <!-- JavaScript and Vue.js -->
     <script>
 
+        // Access createApp from Vue
         const { createApp } = Vue;
 
+        // Create Vue application
         const app = createApp({
 
+            // Application data
             data() {
 
                 return {
 
+                    // Sorting settings
                     sortBy: "subject",
                     sortOrder: "asc",
 
-                    // Store selected lesson IDs
+                    // Shopping cart
                     cart: [],
 
-                    // Control the cart page
+                    // Control shopping cart display
                     displayCart: false,
 
-                    // Checkout form values
+                    // Customer information
                     customerName: "",
                     customerPhone: "",
 
                     // Booking confirmation
                     confirmation: null,
 
-                    // All available lessons
+                    // Lessons data
                     lessons: [
 
                         {
@@ -480,8 +400,10 @@
                     ]
 
                 };
+
             },
 
+            // Computed properties
             computed: {
 
                 // Sort lessons
@@ -491,6 +413,7 @@
 
                         let result;
 
+                        // Alphabetical sorting
                         if (
                             this.sortBy === "subject" ||
                             this.sortBy === "location"
@@ -502,11 +425,13 @@
 
                         } else {
 
+                            // Numerical sorting
                             result =
                                 a[this.sortBy] - b[this.sortBy];
 
                         }
 
+                        // Ascending or descending
                         return this.sortOrder === "asc"
                             ? result
                             : -result;
@@ -515,7 +440,7 @@
 
                 },
 
-                // Get details for cart lesson IDs
+                // Get lesson details for cart items
                 cartLessons() {
 
                     return this.cart.map(lessonId => {
@@ -530,7 +455,7 @@
 
                 },
 
-                // Calculate total lesson prices
+                // Calculate cart total
                 cartTotal() {
 
                     return this.cartLessons.reduce(
@@ -561,7 +486,7 @@
 
                 },
 
-                // Enable checkout when all inputs are valid
+                // Check whether checkout is valid
                 isCheckoutValid() {
 
                     return (
@@ -574,16 +499,18 @@
 
             },
 
+            // Application methods
             methods: {
 
-                // Add a lesson to the cart
+                // Add lesson to shopping cart
                 addToCart(lesson) {
 
                     if (lesson.spaces > 0) {
 
+                        // Store lesson ID
                         this.cart.push(lesson.id);
 
-                        // Clear any previous confirmation
+                        // Clear previous confirmation
                         this.confirmation = null;
 
                         // Reduce available spaces
@@ -593,35 +520,42 @@
 
                 },
 
-                // Remove a lesson from the cart
+                // Remove lesson from shopping cart
                 removeFromCart(index) {
 
+                    // Get selected lesson ID
                     const lessonId = this.cart[index];
 
+                    // Find original lesson
                     const lesson = this.lessons.find(item => {
 
                         return item.id === lessonId;
 
                     });
 
-                    // Restore an available space
+                    // Restore one available space
                     if (lesson) {
+
                         lesson.spaces++;
+
                     }
 
-                    // Remove one selected item
+                    // Remove selected cart item
                     this.cart.splice(index, 1);
 
                 },
 
-                // Checkout and show confirmation
+                // Checkout function
                 checkout() {
 
+                    // Prevent checkout with invalid information
                     if (!this.isCheckoutValid) {
+
                         return;
+
                     }
 
-                    // Create a temporary booking summary
+                    // Create temporary booking confirmation
                     this.confirmation = {
 
                         name: this.customerName.trim(),
@@ -634,9 +568,10 @@
 
                     };
 
-                    // Clear cart and checkout form
+                    // Empty the shopping cart
                     this.cart = [];
 
+                    // Clear customer information
                     this.customerName = "";
 
                     this.customerPhone = "";
@@ -647,9 +582,11 @@
 
         });
 
+        // Mount Vue application
         app.mount("#app");
 
     </script>
 
 </body>
+
 </html>
