@@ -10,14 +10,14 @@
 
     <title>After School Activities</title>
 
-    <!-- Load Vue.js -->
+    <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- Load Font Awesome icons -->
+    <!-- Font Awesome icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <!-- Load external CSS file -->
+    <!-- External CSS file -->
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -28,17 +28,20 @@
     <div id="app" class="container">
 
         <header>
+
             <h1>After School Activities</h1>
 
             <p class="subtitle">
                 Explore our classes and activities.
             </p>
+
         </header>
 
         <!-- Shopping Cart navigation -->
         <button
             type="button"
-            v-on:click="displayCart = !displayCart">
+            v-on:click="displayCart = !displayCart"
+            v-bind:disabled="bookingInProgress">
 
             <i class="fa fa-shopping-cart"></i>
 
@@ -48,19 +51,54 @@
 
         </button>
 
+        <!-- Loading message -->
+        <p v-if="loadingLessons">
+            Loading lessons from MongoDB...
+        </p>
+
+        <!-- Database connection error -->
+        <div v-if="lessonsError">
+
+            <p class="error" role="alert">
+                {{ lessonsError }}
+            </p>
+
+            <button
+                type="button"
+                v-on:click="loadLessons">
+                Try Again
+            </button>
+
+        </div>
+
         <!-- Sorting controls -->
-        <div class="sorting-controls" v-if="!displayCart">
+        <div
+            class="sorting-controls"
+            v-if="!displayCart">
 
             <label for="sortBy">
                 Sort lessons by:
             </label>
 
-            <select id="sortBy" v-model="sortBy">
+            <select
+                id="sortBy"
+                v-model="sortBy">
 
-                <option value="subject">Subject</option>
-                <option value="location">Location</option>
-                <option value="price">Price</option>
-                <option value="spaces">Available Spaces</option>
+                <option value="subject">
+                    Subject
+                </option>
+
+                <option value="location">
+                    Location
+                </option>
+
+                <option value="price">
+                    Price
+                </option>
+
+                <option value="spaces">
+                    Available Spaces
+                </option>
 
             </select>
 
@@ -68,18 +106,28 @@
                 Order:
             </label>
 
-            <select id="sortOrder" v-model="sortOrder">
+            <select
+                id="sortOrder"
+                v-model="sortOrder">
 
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
+                <option value="asc">
+                    Ascending
+                </option>
+
+                <option value="desc">
+                    Descending
+                </option>
 
             </select>
 
         </div>
 
-        <!-- Display all lessons -->
-        <main class="lesson-grid" v-if="!displayCart">
+        <!-- Lessons page -->
+        <main
+            class="lesson-grid"
+            v-if="!displayCart">
 
+            <!-- Lessons retrieved from MongoDB -->
             <article
                 class="lesson-card"
                 v-for="lesson in sortedLessons"
@@ -92,15 +140,17 @@
                     aria-hidden="true">
                 </i>
 
-                <!-- Lesson subject -->
-                <h2>{{ lesson.subject }}</h2>
+                <!-- Subject -->
+                <h2>
+                    {{ lesson.subject }}
+                </h2>
 
-                <!-- Lesson location -->
+                <!-- Location -->
                 <p>
                     Location: {{ lesson.location }}
                 </p>
 
-                <!-- Lesson price -->
+                <!-- Price -->
                 <p>
                     Price: Rs {{ lesson.price }}
                 </p>
@@ -110,13 +160,19 @@
                     Available spaces: {{ lesson.spaces }}
                 </p>
 
-                <!-- Add to Cart button -->
+                <!-- Add to Cart -->
                 <button
                     type="button"
                     v-on:click="addToCart(lesson)"
-                    v-bind:disabled="lesson.spaces === 0">
+                    v-bind:disabled="
+                        lesson.spaces === 0 ||
+                        loadingLessons ||
+                        !!lessonsError
+                    ">
 
-                    Add to Cart
+                    {{ lesson.spaces === 0
+                        ? "Fully Booked"
+                        : "Add to Cart" }}
 
                 </button>
 
@@ -129,16 +185,20 @@
 
             <h2>Your Shopping Cart</h2>
 
-            <!-- Booking confirmation -->
+            <!-- Successful booking confirmation -->
             <div
                 v-if="confirmation"
                 class="confirmation"
                 role="status">
 
-                <h3>Booking Confirmation (Demo)</h3>
+                <h3>Booking Confirmed!</h3>
 
                 <p>
                     Thank you, {{ confirmation.name }}.
+                </p>
+
+                <p>
+                    Your booking has been saved successfully.
                 </p>
 
                 <p>
@@ -155,13 +215,12 @@
                 </p>
 
                 <p>
-                    Preview only: no booking has been
-                    saved to a database yet.
+                    Booking ID: {{ confirmation.orderId }}
                 </p>
 
             </div>
 
-            <!-- Cart contents and checkout -->
+            <!-- Cart contents -->
             <template v-else>
 
                 <!-- Empty cart message -->
@@ -179,7 +238,9 @@
                         v-for="(lesson, index) in cartLessons"
                         v-bind:key="index">
 
-                        <h3>{{ lesson.subject }}</h3>
+                        <h3>
+                            {{ lesson.subject }}
+                        </h3>
 
                         <p>
                             Location: {{ lesson.location }}
@@ -192,7 +253,8 @@
                         <!-- Remove button -->
                         <button
                             type="button"
-                            v-on:click="removeFromCart(index)">
+                            v-on:click="removeFromCart(index)"
+                            v-bind:disabled="bookingInProgress">
 
                             Remove
 
@@ -200,7 +262,7 @@
 
                     </div>
 
-                    <!-- Shopping Cart Total -->
+                    <!-- Cart total -->
                     <h3>
                         Cart Total: Rs {{ cartTotal }}
                     </h3>
@@ -212,7 +274,7 @@
 
                         <h3>Checkout</h3>
 
-                        <!-- Customer Name -->
+                        <!-- Customer name -->
                         <label for="customerName">
                             Full name:
                         </label>
@@ -226,13 +288,16 @@
                         <!-- Name validation -->
                         <p
                             class="error"
-                            v-if="customerName !== '' && !isNameValid">
+                            v-if="
+                                customerName !== '' &&
+                                !isNameValid
+                            ">
 
                             Use letters and spaces only.
 
                         </p>
 
-                        <!-- Customer Phone -->
+                        <!-- Customer phone -->
                         <label for="customerPhone">
                             Phone number:
                         </label>
@@ -247,19 +312,37 @@
                         <!-- Phone validation -->
                         <p
                             class="error"
-                            v-if="customerPhone !== '' && !isPhoneValid">
+                            v-if="
+                                customerPhone !== '' &&
+                                !isPhoneValid
+                            ">
 
                             Use digits only
                             (no spaces or symbols).
 
                         </p>
 
+                        <!-- Booking error -->
+                        <p
+                            class="error"
+                            v-if="bookingError"
+                            role="alert">
+
+                            {{ bookingError }}
+
+                        </p>
+
                         <!-- Confirm Booking button -->
                         <button
                             type="submit"
-                            v-bind:disabled="!isCheckoutValid">
+                            v-bind:disabled="
+                                !isCheckoutValid ||
+                                bookingInProgress
+                            ">
 
-                            Confirm Booking
+                            {{ bookingInProgress
+                                ? "Processing Booking..."
+                                : "Confirm Booking" }}
 
                         </button>
 
@@ -273,19 +356,22 @@
 
     </div>
 
-    <!-- JavaScript and Vue.js -->
+    <!-- Vue application -->
     <script>
 
-        // Access createApp from Vue
+        // Access Vue's createApp function
         const { createApp } = Vue;
 
-        // Create Vue application
+        // Create the Vue application
         const app = createApp({
 
             // Application data
             data() {
 
                 return {
+
+                    // Express backend address
+                    apiUrl: "http://localhost:3000",
 
                     // Sorting settings
                     sortBy: "subject",
@@ -294,7 +380,7 @@
                     // Shopping cart
                     cart: [],
 
-                    // Control shopping cart display
+                    // Control cart visibility
                     displayCart: false,
 
                     // Customer information
@@ -304,109 +390,33 @@
                     // Booking confirmation
                     confirmation: null,
 
-                    // Lessons data
-                    lessons: [
+                    // Booking state
+                    bookingInProgress: false,
+                    bookingError: "",
 
-                        {
-                            id: 1001,
-                            subject: "Art",
-                            location: "Curepipe",
-                            price: 400,
-                            spaces: 5,
-                            icon: "fa fa-paint-brush"
-                        },
+                    // Lesson loading state
+                    loadingLessons: false,
+                    lessonsError: "",
 
-                        {
-                            id: 1002,
-                            subject: "Mathematics",
-                            location: "Quatre Bornes",
-                            price: 350,
-                            spaces: 5,
-                            icon: "fa fa-calculator"
-                        },
-
-                        {
-                            id: 1003,
-                            subject: "Science",
-                            location: "Rose Hill",
-                            price: 450,
-                            spaces: 5,
-                            icon: "fa fa-flask"
-                        },
-
-                        {
-                            id: 1004,
-                            subject: "Music",
-                            location: "Vacoas",
-                            price: 500,
-                            spaces: 5,
-                            icon: "fa fa-music"
-                        },
-
-                        {
-                            id: 1005,
-                            subject: "Football",
-                            location: "Moka",
-                            price: 300,
-                            spaces: 5,
-                            icon: "fa fa-futbol-o"
-                        },
-
-                        {
-                            id: 1006,
-                            subject: "Computer Science",
-                            location: "Port Louis",
-                            price: 550,
-                            spaces: 5,
-                            icon: "fa fa-laptop"
-                        },
-
-                        {
-                            id: 1007,
-                            subject: "English",
-                            location: "Phoenix",
-                            price: 350,
-                            spaces: 5,
-                            icon: "fa fa-book"
-                        },
-
-                        {
-                            id: 1008,
-                            subject: "Photography",
-                            location: "Beau Bassin",
-                            price: 500,
-                            spaces: 5,
-                            icon: "fa fa-camera"
-                        },
-
-                        {
-                            id: 1009,
-                            subject: "Geography",
-                            location: "Curepipe",
-                            price: 350,
-                            spaces: 5,
-                            icon: "fa fa-globe"
-                        },
-
-                        {
-                            id: 1010,
-                            subject: "Dance",
-                            location: "Quatre Bornes",
-                            price: 400,
-                            spaces: 5,
-                            icon: "fa fa-child"
-                        }
-
-                    ]
+                    // Lessons will come from MongoDB
+                    lessons: []
 
                 };
+
+            },
+
+            // Runs when Vue loads
+            mounted() {
+
+                // Fetch lessons from the backend
+                this.loadLessons();
 
             },
 
             // Computed properties
             computed: {
 
-                // Sort lessons
+                // Sort lessons automatically
                 sortedLessons() {
 
                     return [...this.lessons].sort((a, b) => {
@@ -443,15 +453,15 @@
                 // Get lesson details for cart items
                 cartLessons() {
 
-                    return this.cart.map(lessonId => {
+                    return this.cart
+                        .map(lessonId => {
 
-                        return this.lessons.find(lesson => {
+                            return this.lessons.find(lesson => {
+                                return lesson.id === lessonId;
+                            });
 
-                            return lesson.id === lessonId;
-
-                        });
-
-                    });
+                        })
+                        .filter(lesson => lesson !== undefined);
 
                 },
 
@@ -491,8 +501,10 @@
 
                     return (
                         this.cart.length > 0 &&
+                        this.cartLessons.length === this.cart.length &&
                         this.isNameValid &&
-                        this.isPhoneValid
+                        this.isPhoneValid &&
+                        !this.lessonsError
                     );
 
                 }
@@ -502,19 +514,97 @@
             // Application methods
             methods: {
 
+                // Load lessons from MongoDB through Express
+                async loadLessons() {
+
+                    this.loadingLessons = true;
+
+                    this.lessonsError = "";
+
+                    try {
+
+                        // Request lessons from the backend
+                        const response = await fetch(
+                            `${this.apiUrl}/lessons`
+                        );
+
+                        // Check the response
+                        if (!response.ok) {
+
+                            throw new Error(
+                                "Failed to retrieve lessons."
+                            );
+
+                        }
+
+                        // Convert JSON response into an array
+                        const lessons = await response.json();
+
+                        if (!Array.isArray(lessons)) {
+
+                            throw new Error(
+                                "Invalid lesson data received."
+                            );
+
+                        }
+
+                        // Account for lessons already in the cart
+                        // These spaces are only reserved locally
+                        this.lessons = lessons.map(lesson => {
+
+                            const selectedQuantity =
+                                this.cart.filter(
+                                    id => id === lesson.id
+                                ).length;
+
+                            return {
+                                ...lesson,
+                                spaces: Math.max(
+                                    0,
+                                    lesson.spaces - selectedQuantity
+                                )
+                            };
+
+                        });
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error loading lessons:",
+                            error
+                        );
+
+                        this.lessonsError =
+                            "Unable to load lessons from the database. " +
+                            "Check that your backend is running.";
+
+                    } finally {
+
+                        this.loadingLessons = false;
+
+                    }
+
+                },
+
                 // Add lesson to shopping cart
                 addToCart(lesson) {
 
-                    if (lesson.spaces > 0) {
+                    // Check whether spaces are available
+                    if (
+                        lesson.spaces > 0 &&
+                        !this.loadingLessons &&
+                        !this.lessonsError
+                    ) {
 
-                        // Store lesson ID
+                        // Add selected lesson ID
                         this.cart.push(lesson.id);
 
-                        // Clear previous confirmation
-                        this.confirmation = null;
-
-                        // Reduce available spaces
+                        // Reduce displayed spaces locally
                         lesson.spaces--;
+
+                        // Clear previous messages
+                        this.confirmation = null;
+                        this.bookingError = "";
 
                     }
 
@@ -526,55 +616,124 @@
                     // Get selected lesson ID
                     const lessonId = this.cart[index];
 
-                    // Find original lesson
+                    // Find the original lesson
                     const lesson = this.lessons.find(item => {
-
                         return item.id === lessonId;
-
                     });
 
-                    // Restore one available space
+                    // Restore the locally reserved space
                     if (lesson) {
 
                         lesson.spaces++;
 
                     }
 
-                    // Remove selected cart item
+                    // Remove the selected item
                     this.cart.splice(index, 1);
+
+                    this.bookingError = "";
 
                 },
 
-                // Checkout function
-                checkout() {
+                // Send booking to the Express backend
+                async checkout() {
 
-                    // Prevent checkout with invalid information
-                    if (!this.isCheckoutValid) {
+                    // Prevent invalid or duplicate submissions
+                    if (
+                        !this.isCheckoutValid ||
+                        this.bookingInProgress
+                    ) {
 
                         return;
 
                     }
 
-                    // Create temporary booking confirmation
-                    this.confirmation = {
+                    this.bookingInProgress = true;
+
+                    this.bookingError = "";
+
+                    // Prepare customer booking information
+                    const order = {
 
                         name: this.customerName.trim(),
 
                         phone: this.customerPhone.trim(),
 
-                        lessonIds: [...this.cart],
-
-                        total: this.cartTotal
+                        lessonIds: [...this.cart]
 
                     };
 
-                    // Empty the shopping cart
-                    this.cart = [];
+                    try {
 
-                    // Clear customer information
-                    this.customerName = "";
+                        // Send booking to MongoDB through Express
+                        const response = await fetch(
+                            `${this.apiUrl}/orders`,
+                            {
+                                method: "POST",
 
-                    this.customerPhone = "";
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+
+                                body: JSON.stringify(order)
+                            }
+                        );
+
+                        // Read the backend response
+                        const result = await response.json();
+
+                        // Check whether booking succeeded
+                        if (!response.ok) {
+
+                            throw new Error(
+                                result.message ||
+                                "Booking failed."
+                            );
+
+                        }
+
+                        // Show actual booking confirmation
+                        this.confirmation = {
+
+                            name: order.name,
+
+                            phone: order.phone,
+
+                            lessonIds: [...order.lessonIds],
+
+                            total: result.total,
+
+                            orderId: result.orderId
+
+                        };
+
+                        // Empty the cart only after success
+                        this.cart = [];
+
+                        // Clear checkout fields
+                        this.customerName = "";
+
+                        this.customerPhone = "";
+
+                        // Refresh availability from MongoDB
+                        await this.loadLessons();
+
+                    } catch (error) {
+
+                        console.error(
+                            "Booking error:",
+                            error
+                        );
+
+                        this.bookingError =
+                            error.message ||
+                            "Unable to complete booking.";
+
+                    } finally {
+
+                        this.bookingInProgress = false;
+
+                    }
 
                 }
 
